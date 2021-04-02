@@ -1,0 +1,298 @@
+<html dir="ltr" lang="en" class="">
+
+<head>
+    <title>Simple Calculator</title>
+
+    <style>
+        h1 {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 3rem;
+        }
+
+        body {
+            font-family: monospace;
+            background-color: rgb(130, 118, 118);
+            margin-right: 60px;
+            margin-left: 60px;
+        }
+
+        .number,
+        .operator {
+            width: 20%;
+            height: 60px;
+            margin: 1px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        #main-container {
+            width: 50%;
+            padding: 0px 5px 10px 5px;
+            margin: 90px auto;
+            background: black;
+            color: white;
+            font-family: monospace;
+        }
+
+
+        .row {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+        }
+
+        .buttons-area {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+
+
+        }
+
+        .number:hover,
+        .operator:hover {
+            background-color: dodgerblue;
+            font-size: 1.8em;
+        }
+
+
+        .main-screen {
+
+            padding: 8px 5px 5px 5px;
+            font-size: 3rem;
+            height: 80%;
+            font-family: monospace;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <h1> A Simple Calculator</h1>
+
+
+    <div id="main-container">
+        <div class="body">
+            <div class="screen">
+
+                <div class="main-screen" id="main-screen">0</div>
+            </div>
+            <div class="buttons-area">
+                <div class="row">
+                    <button class="number ">7</button>
+                    <button class="number ">8</button>
+                    <button class="number">9</button>
+                    <button class="operator" id="div" style="font-size: 1.5em;">/</button>
+                    <button class="operator" id="clr" style="font-size: 1.5em;">C</button>
+
+                </div>
+
+                <div class="row">
+                    <button class="number">4</button>
+                    <button class="number">5</button>
+                    <button class="number">6</button>
+                    <button class="operator" id="mul" style="font-size: 1.5em;">&lowast;</button>
+                    <button class="operator" id="del" style="font-size: 1.5em;">&larr;</button>
+                </div>
+
+                <div class="row">
+                    <button class="number">1</button>
+                    <button class="number">2</button>
+                    <button class="number">3</button>
+                    <button class="operator" id="sub" style="font-size: 1.5em;">-</button>
+                    <button class="operator" id="sqrt" style="font-size: 1.5em;">&Sqrt;</button>
+
+                </div>
+
+                <div class="row">
+                    <button class="number">0</button>
+                    <button class="number" style="font-size: 1.5em;">.</button>
+                    <button class="operator" style="font-size: 1.5em;" id="plus">+</button>
+
+
+                    <button class="operator" id="equals" style="width:40%" style="font-size: 1.5em;">=</button>
+                </div>
+            </div>
+
+            <script>
+
+                //get elements ( in this case buttons) with class name "number"
+                const numbers = document.getElementsByClassName("number");
+                //get elements ( in this csase buttons with class name "operator")
+                const operators = document.getElementsByClassName("operator");
+                //get the mainScreen node
+                const mainScreen = document.getElementById("main-screen");
+
+                //initialize and set firstOperand and secondOperand to null
+                var firstOperand = null; //can be integer or float
+                var pendingOperator = null; //can be any of the following [+ , -, *, /]
+                var secondOperand = null; //can be integer or float
+                
+                //it can be number or operator that was last pressed, Initialized to number,
+                //because zero is the default value.
+                var lastPressed = "number" //it is either 'number' or 'operator'
+
+                //set onclick handler for the numbers
+                for (let i = 0; i < numbers.length; i++) {
+                    if (i != 10) { //exclude button for dot "."
+                        numbers.item(i).onclick = () => {
+                            if (lastPressed == "operator") {
+                                //operator exist
+                                mainScreen.innerText = numbers.item(i).innerText;
+                                secondOperand = Number(numbers.item(i).innerText)
+                            } else {
+                                mainScreen.innerText = (mainScreen.innerText == "0") ? Number(mainScreen.innerText + numbers.item(i).innerText) : mainScreen.innerText + numbers.item(i).innerText;
+                            }
+                            lastPressed = "number"; //update what was pressed last
+                        } //end onclick
+                    } //end if
+                } //end for loop
+
+
+                //set onClick handler for dot(period)
+                numbers.item(10).onclick = () => {
+                    if (lastPressed == "operator") {
+                        //the user last clicked an operator, before clicking the dot button
+                        mainScreen.innerText = "0."
+                    } else {
+                        //prevent multiple dots and avoid diplaying only "." on the screen
+                        mainScreen.innerText = mainScreen.innerText.includes(".") ?
+                            mainScreen.innerText : mainScreen.innerText == "" ?
+                                "0." : mainScreen.innerText + numbers.item(10).innerText;
+                    }
+
+                    lastPressed = "number" //update what was pressed last
+                } //end onclick
+
+
+
+                //make necessary calculations.
+                const evaluate = (secondOperand) => {
+                    switch (pendingOperator) {
+                        case "mul": //multiplication
+                            return firstOperand * secondOperand;
+                        case "sub"://subtraction
+                            return firstOperand - secondOperand;
+                        case "div"://division
+                            if (secondOperand == 0) {
+                                alert("Cannot divide by zero")
+                                //clear all inputs
+                                document.getElementById("clr").click();
+                                return 0;
+                            } else { return firstOperand / secondOperand; }
+                        case "plus": //addition
+                            return firstOperand + secondOperand;
+                        case "sqrt": //square root
+                            return Math.sqrt(secondOperand);
+                        default:
+                            return secondOperand;
+                    } //end switch
+
+                } //end evaluate
+
+
+
+
+                // set the onClick handler for the operators
+                for (let j = 0; j < operators.length; j++) {
+
+                    //console.log(pendingOperator.id,  pendingOperator.innerText)
+                    //exclude square root, delete, clr and equals
+                    if (operators.item(j).id != "sqrt" && operators.item(j).id != "del" && operators.item(j).id != "clr" && operators.item(j).id != "equals") {
+
+                        operators.item(j).onclick = () => {
+
+                            if (lastPressed == "operator") {
+                                //set the pending operator
+                                pendingOperator = operators.item(j).id;
+
+                            }
+                            else {
+                                if (secondOperand != null) {
+                                    // evaluate pending operator first
+                                    let result = evaluate(secondOperand)
+                                    //update to the new operator
+                                    pendingOperator = operators.item(j).id;
+                                    //update main screen to display result
+                                    mainScreen.innerText = result;
+                                    //firstOperand = result;
+                                    secondOperand = null;
+
+                                } else {
+
+                                    //set firstOperand
+                                    firstOperand = Number(mainScreen.innerText);
+                                    pendingOperator = operators.item(j).id; //update pending operator
+
+                                }
+
+                            } //end else
+                            lastPressed = "operator";
+
+                        }//end onclick
+
+
+                    }//end if
+                } //close for loop
+
+                //set onclick for equals
+                document.getElementById("equals").onclick = () => {
+                    secondOperand = Number(mainScreen.innerText)
+                    let result = evaluate(secondOperand)
+                    mainScreen.innerText = result;
+                    secondOperand = null;
+                }
+
+
+                //set the onclick handler for C button
+                document.getElementById("clr").onclick = () => {
+                    mainScreen.innerText = "0";
+
+                    //initialize and set firstOperand and secondOperand to null
+                    firstOperand = null;
+                    secondOperand = null;
+                    pendingOperator = null;
+                    //it can be number or operator that was last pressed, Initialized to number,
+                    //because zero is always on the screen.
+                    lastPressed = "number"
+                } //end onclick
+
+                //set the onclick handler for delete button
+                document.getElementById("del").onclick = () => {
+                    content = mainScreen.innerText
+                    newcontent = content.slice(0, content.length - 1)
+                    mainScreen.innerText = (newcontent.length == 0) ? "0" : newcontent;
+                } //end onclick
+
+                //set the onclick handler for square root button
+                document.getElementById("sqrt").onclick = () => {
+                    //set the pendingOperator to sqrt
+                    pendingOperator = "sqrt";
+                    //the first Operand doesn't matter with this operator
+                    operand = Number(mainScreen.innerText)
+                    //get result, update mainscreen and update lastPressed
+                    result = evaluate(operand)
+                    mainScreen.innerText = result;
+                    lastPressed = "number";
+
+                }//end onclick
+
+
+
+            </script>
+
+
+        </div>
+    </div>
+</body>
+
+</html>
